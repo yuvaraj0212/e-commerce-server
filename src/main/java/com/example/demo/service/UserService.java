@@ -1,10 +1,8 @@
 package com.example.demo.service;
 
-import java.util.Date;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,12 +11,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.base.ExceptionController;
-import com.example.demo.exception.SimplesConstant;
 import com.example.demo.model.Role;
 import com.example.demo.model.UserModel;
 import com.example.demo.pojo.LoginRequest;
@@ -37,8 +33,8 @@ public class UserService extends ExceptionController{
 	UserRepo userRepo;
 	@Autowired
 	private JavaMailSender mailSender;
-	@Autowired
-	BCryptPasswordEncoder encoder;
+//	@Autowired
+//	BCryptPasswordEncoder encoder;
 	@Autowired
 	RoleRepo roleRepo;
 
@@ -59,8 +55,9 @@ public class UserService extends ExceptionController{
 		if(emailExists) {
 			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),"Email ID already exists");
 		}
-			String enocode = encoder.encode(userModel.getPassword());
-			userDetails.setPassword(enocode);
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+			String encode = encoder.encode(userModel.getPassword());
+			userDetails.setPassword(encode);
 			userDetails.setUsername(userModel.getUsername());
 			userDetails.setConfirmPassword(userModel.getConfirmPassword());
 			userDetails.setPhone(userModel.getPhone());

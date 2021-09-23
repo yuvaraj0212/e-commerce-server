@@ -24,16 +24,11 @@ public class UserDetailsImpl implements UserDetails {
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(UserModel user) {
-		this.id = user.getId();
-		this.username = user.getEmail();
-		this.password = user.getPassword();
-//		this.role = user.getRoles().iterator().next().getRolename();
-	}
 
 
 
-	public UserDetailsImpl(Long id,String email, String password, String username,Collection<? extends GrantedAuthority> authorities) {
+
+	public UserDetailsImpl(Long id,String username, String password, String email,Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
@@ -47,8 +42,8 @@ public class UserDetailsImpl implements UserDetails {
 				.collect(Collectors.toList());
 		return new UserDetailsImpl(user.getId(), 
 				user.getUsername(), 
-				user.getEmail(),
-				user.getPassword(), 
+				user.getPassword(),
+				user.getEmail(), 
 				authorities);
 	}
 //	public static UserDetails build(Long id,String email, String password, String username, String role) {
