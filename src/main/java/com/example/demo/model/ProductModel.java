@@ -8,18 +8,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Table(name = "tbl_products")
-public class Product {
+public class ProductModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@NotEmpty(message="product code must not to be null")
 	private String code;
+	@NotEmpty(message="product name must not to be null")
 	private String name;
 	private String details;
 	private String discount;
+	@NotEmpty(message="price must not to be null")
 	private String price;
 	private String filename;
 	@Column(name = "product_img")
@@ -106,25 +112,6 @@ public class Product {
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
-	}
-
-	public Product(Long id, String code, String name, String details, String discount, String price, String filename,
-			byte[] data, MultipartFile mfile, Date createDate) {
-		super();
-		this.id = id;
-		this.code = code;
-		this.name = name;
-		this.details = details;
-		this.discount = discount;
-		this.price = price;
-		this.filename = filename;
-		this.data = data;
-		this.mfile = mfile;
-		this.createDate = createDate;
-	}
-
-	public Product() {
-		super();
 	}
 
 }

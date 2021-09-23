@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +39,7 @@ public class UserController extends ExceptionController {
 	@Autowired
 	UserService userService;
 	
-	@PostMapping("/signin")
+	@PostMapping(value="/signin")
 	public Object authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		return userService.signin(loginRequest);
 	}
@@ -48,62 +49,14 @@ public class UserController extends ExceptionController {
 		return userService.signUp(userModel);
 	}	
 	
-
-	@RequestMapping(value = "/getuser", method = { RequestMethod.GET })
-	@ResponseBody
-	public UserModel getuser(@RequestParam(name = "id") String id) {
-		return userRepo.findById(Long.parseLong(id)).get();
+	@GetMapping(value="/user-list")
+	public ResponseEntity<Object> getUserList(){
+		return userService.getUserList();
 	}
-
-	@RequestMapping(value = "/deleteusers", method = { RequestMethod.DELETE })
-	@ResponseBody
-	public String delete(@RequestParam(name = "id") String id) {
-		userRepo.delete(userRepo.findById(Long.parseLong(id)).get());
-		return "dashboard";
+	
+	@GetMapping(value="/current-user")
+	public ResponseEntity<Object> getCurrentUser(){
+		return userService.getCurrentUser();
 	}
-
-	@RequestMapping(value = "/getlist/user", method = { RequestMethod.GET })
-	public List<UserModel> getAllUser(HttpServletResponse http) {
-
-		List<UserModel> getListUser = userRepo.findAll();
-		// Collections.reverse(getListUser);
-		// getListUser.forEach(action-> {
-
-		// } );
-		return getListUser;
-
-	}
-
-	@RequestMapping(value = "/datalist/orderrequest", method = RequestMethod.GET)
-	public List<UserModel> Orderdetails(
-			HttpServletResponse response1/* , @PageableDefault(size = 7) Pageable pageable */) {
-		List<UserModel> orderdetails = new ArrayList<>();
-		orderdetails = userRepo.findAll();
-		Collections.reverse(orderdetails);
-		orderdetails.forEach(action -> {
-		});
-		// response1.setHeader("Content-Range", "users 0-" + productRepo.count() + "/" +
-		// productRepo.count());
-		return orderdetails;
-
-	}
-
-//	@RequestMapping(value = "/edit/user", method = { RequestMethod.POST })
-//
-//	public Response editUser(@RequestBody UserModel user) throws IOException, BaseException {
-//		UserModel user1 = userRepo.findById(user.getId()).get();
-//		// if (userRepo.findByUserName(user.getUserName()) == null) {
-//		if (userRepo.findByEmail(user.getEmail()) == null) {
-//			user1.setPhone(user.getPhone());
-//			user1.setEmail(user.getEmail());
-////			user1.setUserName(user.getRolename());
-//			userRepo.save(user1);
-//			return response("Edit Succcessfully", user1);
-//
-//		}
-//		return failure(SimplesConstant.CODE_0.getCode(), "Mail Id Already Exists");
-//
-//	}
-	// return failure(SimplesConstant.CODE_0.getCode(), "Mail Id Already Exists");
 
 }

@@ -17,13 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @PropertySource(value = { "classpath:application.properties" })
 public class BaseController {
-	@Value("${firstagro.filepath}")
+	@Value("${image.filepath}")
 	String filepath;
 	
 	public void writeByte(byte bytes[], String filename) throws Exception {
 		File file = new File(filepath + filename);
-		System.out.println(filename);
-
 		ImageIO.read(file);
 	}
 	public File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException {

@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +35,6 @@ public class UserService extends ExceptionController{
 	UserRepo userRepo;
 	@Autowired
 	private JavaMailSender mailSender;
-//	@Autowired
-//	BCryptPasswordEncoder encoder;
 	@Autowired
 	RoleRepo roleRepo;
 
@@ -76,5 +76,17 @@ public class UserService extends ExceptionController{
 		email.setText("");
 		email.setTo(emailId);
 		mailSender.send(email);
+	}
+	
+	public ResponseEntity<Object> getUserList(){
+		List<UserModel> userList = userRepo.findByRole("user");
+		return response(HttpStatus.OK.value(),"userlist",userList);
+	}
+	
+	public ResponseEntity<Object> getCurrentUser(){
+		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+		UserModel user = userRepo.findByEmail(userDetails.getEmail());
+		return response(HttpStatus.OK.value(),"user details", user);
 	}
 }

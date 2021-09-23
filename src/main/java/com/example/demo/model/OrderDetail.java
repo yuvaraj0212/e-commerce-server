@@ -21,7 +21,7 @@ public class OrderDetail {
 	private Order order;
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "product_id", nullable = false,referencedColumnName = "id")
-	private Product product;
+	private ProductModel productModel;
 	private String quanity;
 	private String price;
 	private String amount;
@@ -37,11 +37,11 @@ public class OrderDetail {
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-	public Product getProduct() {
-		return product;
+	public ProductModel getProduct() {
+		return productModel;
 	}
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setProduct(ProductModel productModel) {
+		this.productModel = productModel;
 	}
 	public String getQuanity() {
 		return quanity;
@@ -61,11 +61,11 @@ public class OrderDetail {
 	public void setAmount(String amount) {
 		this.amount = amount;
 	}
-	public OrderDetail(Long id, Order order, Product product, String quanity, String price, String amount) {
+	public OrderDetail(Long id, Order order, ProductModel productModel, String quanity, String price, String amount) {
 		super();
 		this.id = id;
 		this.order = order;
-		this.product = product;
+		this.productModel = productModel;
 		this.quanity = quanity;
 		this.price = price;
 		this.amount = amount;
