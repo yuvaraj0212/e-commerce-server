@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -16,17 +17,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.base.ExceptionController;
+import com.example.demo.exception.ExceptionController;
 import com.example.demo.model.Role;
 import com.example.demo.model.UserModel;
 import com.example.demo.pojo.LoginRequest;
+import com.example.demo.pojo.ResetPassword;
 import com.example.demo.repo.RoleRepo;
 import com.example.demo.repo.UserRepo;
 import com.example.demo.util.JwtUtils;
 
 @Service
-public class UserService extends ExceptionController{
-	
+public class UserService extends ExceptionController {
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	@Autowired
@@ -48,45 +50,91 @@ public class UserService extends ExceptionController{
 		user.setToken(jwt);
 		return response(HttpStatus.OK.value(), user);
 	}
-	
-	public ResponseEntity<Object> signUp(UserModel userModel){
+
+	public ResponseEntity<Object> signUp(UserModel userModel) {
 		UserModel userDetails = new UserModel();
 		boolean emailExists = userRepo.existsByEmail(userModel.getEmail());
-		if(emailExists) {
-			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),"Email ID already exists");
+		if (emailExists) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"Email ID already exists");
+		}
+		if(!userModel.getPassword().equals(userModel.getConfirmPassword())) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"password and confirm password not matched please check");
 		}
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-			String encode = encoder.encode(userModel.getPassword());
-			userDetails.setPassword(encode);
-			userDetails.setUsername(userModel.getUsername());
-			userDetails.setConfirmPassword(userModel.getConfirmPassword());
-			userDetails.setPhone(userModel.getPhone());
-			userDetails.setEmail(userModel.getEmail());
-			Set<Role> role = roleRepo.findByRolename("user");
-			userDetails.setRoles(role);
-			userRepo.save(userDetails);
-			mailSender(userDetails.getEmail());
-			return response(HttpStatus.OK.value(),"user created successfully", userDetails);		
+		String encode = encoder.encode(userModel.getPassword());
+		userDetails.setPassword(encode);
+		userDetails.setUsername(userModel.getUsername());
+		userDetails.setConfirmPassword(encode);
+		userDetails.setPhone(userModel.getPhone());
+		userDetails.setEmail(userModel.getEmail());
+		Set<Role> role = roleRepo.findByRolename("user");
+		userDetails.setRoles(role);
+		userRepo.save(userDetails);
+		mailSender(userDetails.getEmail(),"Welcome to shoping world buddy");
+		return response(HttpStatus.OK.value(), "user created successfully", userDetails);
 	}
-	
-	public void mailSender(String emailId) {
+
+	public void mailSender(String emailId,String subject) {
 		SimpleMailMessage email = new SimpleMailMessage();
 		email.setFrom("shaping <kprabha10192@gamil.com>");
-		email.setSubject("welcome to shaping word");
+		email.setSubject(subject);
 		email.setText("");
 		email.setTo(emailId);
 		mailSender.send(email);
 	}
-	
-	public ResponseEntity<Object> getUserList(){
+
+	public ResponseEntity<Object> getUserList() {
 		List<UserModel> userList = userRepo.findByRole("user");
-		return response(HttpStatus.OK.value(),"userlist",userList);
+		return response(HttpStatus.OK.value(), "userlist", userList);
+	}
+
+	public ResponseEntity<Object> getCurrentUser() {
+		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+		UserModel user = userRepo.findByEmail(userDetails.getEmail());
+		return response(HttpStatus.OK.value(), "user details", user);
+	}
+
+	public ResponseEntity<Object> updateUser(UserModel userModel) {
+		UserModel userDetails = userRepo.findById(userModel.getId()).get();
+		if (userDetails == null) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"User details are not avalaible");
+		}
+		userDetails.setUsername(userModel.getUsername());
+		userDetails.setModifiedDate(new Date());
+		userRepo.save(userDetails);
+		return response(HttpStatus.OK.value(), "user details updated successfully", userDetails);
 	}
 	
-	public ResponseEntity<Object> getCurrentUser(){
-		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-		UserModel user = userRepo.findByEmail(userDetails.getEmail());
-		return response(HttpStatus.OK.value(),"user details", user);
+	public ResponseEntity<Object> forgotPassword(String emailId){
+		UserModel userDetails = userRepo.findByEmail(emailId);
+		if(userDetails == null) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"User details are not avalaible");
+		}
+		mailSender(userDetails.getEmail(),"forgot password link");
+		return response(HttpStatus.OK.value(),"reset password link has been to sent to your registered mail");
 	}
+	
+	public ResponseEntity<Object> resetPassword(String emailId,ResetPassword resetPassword){
+		UserModel userDetails = userRepo.findByEmail(emailId);
+		if(userDetails == null) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"User details are not avalaible");
+		}
+		if(!resetPassword.getPassword().equals(resetPassword.getConfirmPassword())) {
+			return failure(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
+					"password and confirm password not matched please check");
+		}
+		
+		BCryptPasswordEncoder cryptPassword = new BCryptPasswordEncoder();
+		userDetails.setPassword(cryptPassword.encode(resetPassword.getPassword()));
+		userDetails.setConfirmPassword(cryptPassword.encode(resetPassword.getConfirmPassword()));
+		userRepo.save(userDetails);
+		return response(HttpStatus.OK.value(),"Password updated successfully");
+	}
+	
 }

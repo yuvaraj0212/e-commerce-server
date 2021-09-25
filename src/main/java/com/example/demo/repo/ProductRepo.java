@@ -7,4 +7,6 @@ import com.example.demo.model.ProductModel;
 @Repository
 public interface ProductRepo extends JpaRepository<ProductModel,Long> {
 
+	boolean existsByNameAndCode(String productName, String productCode);
+
 }

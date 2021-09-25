@@ -1,17 +1,23 @@
 package com.example.demo.model;
 
 import java.util.Date;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.pojo.ProductRequest;
 
 @Entity
 @Table(name = "tbl_products")
@@ -23,16 +29,36 @@ public class ProductModel {
 	private String code;
 	@NotEmpty(message="product name must not to be null")
 	private String name;
+	private String Description;
 	private String details;
 	private String discount;
 	@NotEmpty(message="price must not to be null")
 	private String price;
 	private String filename;
-	@Column(name = "product_img")
-	private byte[] data;
+	private String imageURL;
 	@Transient
 	private MultipartFile mfile;
+	@ManyToOne(cascade = CascadeType.ALL)
+	 @JoinColumn(name = "cate_id")
+	private CategoryModel category;
 	private Date createDate;
+	private Date modifiedDate;
+
+	public String getDescription() {
+		return Description;
+	}
+
+	public void setDescription(String description) {
+		Description = description;
+	}
+
+	public String getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
+	}
 
 	public Long getId() {
 		return id;
@@ -90,14 +116,6 @@ public class ProductModel {
 		this.filename = filename;
 	}
 
-	public byte[] getData() {
-		return data;
-	}
-
-	public void setData(byte[] data) {
-		this.data = data;
-	}
-
 	public MultipartFile getMfile() {
 		return mfile;
 	}
@@ -112,6 +130,37 @@ public class ProductModel {
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public CategoryModel getCategory() {
+		return category;
+	}
+
+	public void setCategory(CategoryModel category) {
+		this.category = category;
+	}
+
+	public Date getModifiedDate() {
+		return modifiedDate;
+	}
+
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+
+	public ProductModel(ProductRequest productRequest) {
+		super();
+		this.name = productRequest.getProductName();
+		this.Description = productRequest.getDescription();
+		this.details = productRequest.getDetails();
+		this.discount = productRequest.getDiscount();
+		this.price = productRequest.getPrice();
+		this.code=productRequest.getProductCode();
+	}
+
+	public ProductModel() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
 }
